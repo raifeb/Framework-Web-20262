@@ -17,10 +17,11 @@ class CheckRole
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (! $request->user() || ! in_array($request->user()->role, $roles)) {
-    return response()->view('errors.403', [
-        'message' => 'Role kasir tidak memiliki izin untuk halaman ini.'
-    ], 403);
-}
+            $userRole = $request->user()?->role ?? 'Anda';
+            return response()->view('errors.403', [
+                'message' => "Role {$userRole} tidak memiliki izin untuk halaman ini."
+            ], 403);
+        }
         return $next($request);
     }
 }

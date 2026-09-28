@@ -1,50 +1,60 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\POSController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ReportController;
-// use App\Http\Controllers\DashboardController; // Aktifkan jika ada filenya
 
-// Rute Pengalihan Awal
-Route::get('/', function () {
-    return redirect()->route('pos.index');
+/*
+| Public & Guest Routes
+*/
+Route::redirect('/', '/login');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 });
 
-// Rute Autentikasi
-Route::get('/login', [LoginController::class, 'create'])
-    ->middleware('guest')
-    ->name('login');
+/*
+| Authenticated Routes
+*/
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-Route::post('/login', [LoginController::class, 'store'])
-    ->middleware('guest')
-    ->name('login.store');
+    // Shared Dashboard (Admin & Kasir)
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
-Route::post('/logout', [LoginController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('logout');
+    /*
+    | Role: Admin Only 
+    */
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('categories', CategoryController::class);
+        Route::resource('products', ProductController::class);
 
-// Rute Dashboard (Bisa diakses Admin & Kasir yang sudah login)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
+        // Placeholder untuk navigation menu
+        Route::get('/reports/sales', function () {
+            return 'Halaman Laporan Penjualan (Belum Diimplementasikan)';
+        })->name('report.sales');
 
-// Rute Khusus Admin
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
-    Route::get('/reports/sales', [ReportController::class, 'sales'])->name('report.sales');
+        // Latihan Praktikum 5: Manajemen Kasir
+        Route::get('/users', function () {
+            return 'Halaman Manajemen Akun Kasir (Khusus Admin)';
+        })->name('users.index');
+    });
 
-    // Latihan 1: Rute Kelola Akun Kasir
-    Route::get('/users', function () {
-        return 'Halaman Manajemen Akun Kasir (Khusus Admin)';
-    })->name('users.index');
-});
+    /*
+    | Role: Kasir & Admin (POS & Transaksi) 
+    */
+    Route::middleware('role:admin,kasir')->group(function () {
+        // Placeholder untuk navigasi POS
+        Route::get('/pos', function () {
+            return 'Halaman POS Kasir (Belum Diimplementasikan)';
+        })->name('pos.index');
 
-// Rute Kasir dan Admin (POS)
-Route::middleware(['auth', 'role:admin,kasir'])->group(function () {
-    Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
-    Route::post('/pos', [POSController::class, 'store'])->name('pos.store');
+        Route::get('/pos/history', function () {
+            return 'Halaman Riwayat Transaksi Kasir';
+        })->name('pos.history');
+    });
 });
