@@ -6,9 +6,15 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 
 /*
+|--------------------------------------------------------------------------
 | Public & Guest Routes
+|--------------------------------------------------------------------------
 */
-Route::redirect('/', '/login');
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -16,18 +22,23 @@ Route::middleware('guest')->group(function () {
 });
 
 /*
+|--------------------------------------------------------------------------
 | Authenticated Routes
+|--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    // Logout (mendukung POST dari tombol form maupun akses direct)
+    Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])->name('logout');
 
-    // Shared Dashboard (Admin & Kasir)
+    // Dashboard Bersama (Admin & Kasir)
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
     /*
-    | Role: Admin Only 
+    |----------------------------------------------------------------------
+    | Role: Admin Only
+    |----------------------------------------------------------------------
     */
     Route::middleware('role:admin')->group(function () {
         Route::resource('categories', CategoryController::class);
@@ -45,7 +56,9 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    | Role: Kasir & Admin (POS & Transaksi) 
+    |----------------------------------------------------------------------
+    | Role: Kasir & Admin (POS & Transaksi)
+    |----------------------------------------------------------------------
     */
     Route::middleware('role:admin,kasir')->group(function () {
         // Placeholder untuk navigasi POS
