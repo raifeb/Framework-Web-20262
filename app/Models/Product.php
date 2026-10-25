@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Kolom yang dapat diisi secara massal (Mass Assignment).
@@ -55,6 +56,25 @@ class Product extends Model
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp ' . number_format($this->price, 0, ',', '.');
+    }
+
+    /**
+     * Accessor: Status ketersediaan stok produk (aman, menipis, habis).
+     * Dapat diakses dengan atribut: $product->stock_status
+     *
+     * @return string
+     */
+    public function getStockStatusAttribute(): string
+    {
+        if ($this->stock <= 0) {
+            return 'habis';
+        }
+
+        if ($this->stock <= 10) {
+            return 'menipis';
+        }
+
+        return 'aman';
     }
 }
 

@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,10 +46,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
 
-        // Placeholder untuk navigation menu
-        Route::get('/reports/sales', function () {
-            return 'Halaman Laporan Penjualan (Belum Diimplementasikan)';
-        })->name('report.sales');
+        // Laporan Penjualan (Khusus Admin)
+        Route::get('/reports/sales', [ReportController::class, 'sales'])->name('report.sales');
 
         // Latihan Praktikum 5: Manajemen Kasir
         Route::get('/users', function () {
@@ -61,13 +61,8 @@ Route::middleware('auth')->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin,kasir')->group(function () {
-        // Placeholder untuk navigasi POS
-        Route::get('/pos', function () {
-            return 'Halaman POS Kasir (Belum Diimplementasikan)';
-        })->name('pos.index');
-
-        Route::get('/pos/history', function () {
-            return 'Halaman Riwayat Transaksi Kasir';
-        })->name('pos.history');
+        Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
+        Route::post('/pos', [POSController::class, 'store'])->name('pos.store');
+        Route::get('/pos/history', [POSController::class, 'history'])->name('pos.history');
     });
 });

@@ -10,13 +10,14 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
+
     public function run(): void
     {
         // 1. Akun Otentikasi
         User::create([
             'name' => 'Admin Toko',
             'email' => 'admin@barokah.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('123'),
             'role' => 'admin',
         ]);
 
