@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,9 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])->name('logout');
 
     // Dashboard Bersama (Admin & Kasir)
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /*
     |----------------------------------------------------------------------
@@ -45,10 +45,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['create', 'store']);
         Route::resource('products', ProductController::class);
 
-        // Laporan Penjualan (Khusus Admin)
-        Route::get('/reports-sales', function () {
-            return view('reports.sales');
-        })->name('reports.sales');
+        // Pertemuan 13: Laporan Penjualan & Export Excel (Khusus Admin)
+        Route::get('/reports/sales', [ReportController::class, 'sales'])->name('report.sales');
+        Route::get('/reports/sales/export', [ReportController::class, 'export'])->name('report.export');
+        // Backward-compatible alias
+        Route::get('/reports-sales', [ReportController::class, 'sales'])->name('reports.sales');
 
         // Latihan Praktikum 5: Manajemen Kasir
         Route::get('/users', function () {

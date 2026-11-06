@@ -20,7 +20,7 @@
                         Produk
                     </a>
                     <a href="{{ route('report.sales') }}"
-                        class="{{ request()->routeIs('report.sales') ? 'text-indigo-600' : 'text-gray-500' }}">
+                        class="{{ request()->routeIs('report.*') || request()->routeIs('reports.*') ? 'text-indigo-600' : 'text-gray-500' }}">
                         Laporan
                     </a>
                 @endif
