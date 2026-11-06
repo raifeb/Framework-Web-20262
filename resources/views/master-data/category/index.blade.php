@@ -51,6 +51,10 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-2 text-center space-x-2">
+                                        <a href="{{ route('categories.show', $category) }}"
+                                            class="text-blue-600 hover:text-blue-900 font-medium">
+                                            Detail
+                                        </a>
                                         <a href="{{ route('categories.edit', $category) }}"
                                             class="text-indigo-600 hover:text-indigo-900 font-medium">
                                             Edit

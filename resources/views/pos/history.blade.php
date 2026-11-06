@@ -35,6 +35,7 @@
                                 <th class="px-4 py-3 text-left font-medium text-gray-700">Item Produk</th>
                                 <th class="px-4 py-3 text-right font-medium text-gray-700">Total Belanja</th>
                                 <th class="px-4 py-3 text-right font-medium text-gray-700">Bayar / Kembalian</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-700">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
@@ -68,10 +69,16 @@
                                         <div>Rp {{ number_format($transaction->pay, 0, ',', '.') }}</div>
                                         <div class="text-green-600 font-medium">Kembali: Rp {{ number_format($transaction->change, 0, ',', '.') }}</div>
                                     </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <a href="{{ route('pos.struk', $transaction) }}"
+                                            class="inline-block px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded border border-indigo-200 transition">
+                                            Lihat Struk
+                                        </a>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                    <td colspan="8" class="px-4 py-8 text-center text-gray-500">
                                         Belum ada riwayat transaksi.
                                     </td>
                                 </tr>

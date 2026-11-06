@@ -15,6 +15,14 @@ class CategoryController extends Controller
         return view('master-data.category.index', compact('categories'));
     }
 
+    public function show(Category $category): View
+    {
+        $category->load('products');
+        $totalStok = $category->products->sum('stock');
+
+        return view('master-data.category.show', compact('category', 'totalStok'));
+    }
+
     public function edit(Category $category): View
     {
         return view('master-data.category.edit', compact('category'));

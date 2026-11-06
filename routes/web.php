@@ -5,7 +5,6 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,11 +42,13 @@ Route::middleware('auth')->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware('role:admin')->group(function () {
-        Route::resource('categories', CategoryController::class);
+        Route::resource('categories', CategoryController::class)->except(['create', 'store']);
         Route::resource('products', ProductController::class);
 
         // Laporan Penjualan (Khusus Admin)
-        Route::get('/reports/sales', [ReportController::class, 'sales'])->name('report.sales');
+        Route::get('/reports-sales', function () {
+            return view('reports.sales');
+        })->name('reports.sales');
 
         // Latihan Praktikum 5: Manajemen Kasir
         Route::get('/users', function () {
@@ -60,9 +61,10 @@ Route::middleware('auth')->group(function () {
     | Role: Kasir & Admin (POS & Transaksi)
     |----------------------------------------------------------------------
     */
-    Route::middleware('role:admin,kasir')->group(function () {
-        Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
-        Route::post('/pos', [POSController::class, 'store'])->name('pos.store');
-        Route::get('/pos/history', [POSController::class, 'history'])->name('pos.history');
+    Route::middleware('role:admin,kasir')->prefix('pos')->name('pos.')->group(function () {
+        Route::get('/', [POSController::class, 'index'])->name('index');
+        Route::post('/', [POSController::class, 'store'])->name('store');
+        Route::get('/history', [POSController::class, 'history'])->name('history');
+        Route::get('/{transaction}/struk', [POSController::class, 'struk'])->name('struk');
     });
 });

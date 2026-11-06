@@ -59,18 +59,15 @@ class ProductController extends Controller
     {
         $validatedData = $request->validated();
 
-        if ($validatedData['price'] > 0 && $validatedData['stock'] >= 0) {
-            $validatedData['code'] = strtoupper(trim($validatedData['code']));
-            $validatedData['unit'] = strtolower(trim($validatedData['unit']));
+        abort_if($validatedData['price'] <= 0 || $validatedData['stock'] < 0, 422);
 
-            Product::create($validatedData);
+        $validatedData = $this->formatProductData($validatedData);
 
-            return redirect()
-                ->route('products.create')
-                ->with('success', 'Produk berhasil ditambahkan.');
-        }
+        Product::create($validatedData);
 
-        abort(422);
+        return redirect()
+            ->route('products.create')
+            ->with('success', 'Produk berhasil ditambahkan.');
     }
 
     private function formatProductData(array $data): array
@@ -81,6 +78,30 @@ class ProductController extends Controller
         return $data;
     }
 
+    public function show(Product $product): View
+    {
+        $product->load(['category', 'transactionDetails.transaction']);
+
+        $totalTerjual = $product->transactionDetails->sum('qty');
+
+        $riwayat = $product->transactionDetails()
+            ->with('transaction')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // Latihan 2: 5 Hari dengan Penjualan Tertinggi
+        $topSalesDays = $product->transactionDetails()
+            ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+            ->selectRaw('DATE(transactions.created_at) as sale_date, SUM(transaction_details.qty) as total_qty')
+            ->groupBy('sale_date')
+            ->orderByDesc('total_qty')
+            ->take(5)
+            ->get();
+
+        return view('master-data.product.show', compact('product', 'totalTerjual', 'riwayat', 'topSalesDays'));
+    }
+
     public function edit(Product $product): View
     {
         $categories = Category::orderBy('name', 'asc')->get();
@@ -89,7 +110,9 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $product->update($request->validated());
+        $validatedData = $this->formatProductData($request->validated());
+
+        $product->update($validatedData);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
     }

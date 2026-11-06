@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -16,7 +17,7 @@ class TransactionAndReportTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'admin']);
 
-        $response = $this->actingAs($admin)->get(route('report.sales'));
+        $response = $this->actingAs($admin)->get(route('reports.sales'));
 
         $response->assertStatus(200);
         $response->assertSee('Laporan Penjualan');
@@ -27,7 +28,7 @@ class TransactionAndReportTest extends TestCase
     {
         $kasir = User::factory()->create(['role' => 'kasir']);
 
-        $response = $this->actingAs($kasir)->get(route('report.sales'));
+        $response = $this->actingAs($kasir)->get(route('reports.sales'));
 
         $response->assertStatus(403);
     }
@@ -66,7 +67,8 @@ class TransactionAndReportTest extends TestCase
 
         $response = $this->actingAs($kasir)->post(route('pos.store'), $payload);
 
-        $response->assertRedirect(route('pos.index'));
+        $transaction = Transaction::latest('id')->first();
+        $response->assertRedirect(route('pos.struk', $transaction));
         $response->assertSessionHas('success');
 
         // Total 2 * 10.000 = 20.000, Bayar = 25.000, Kembalian = 5.000
